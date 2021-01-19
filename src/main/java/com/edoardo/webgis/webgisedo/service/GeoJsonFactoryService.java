@@ -36,8 +36,12 @@ public class GeoJsonFactoryService
                 for(Coordinate c : provinciaPol.getGeometryN(i).getCoordinates())
                     points.add(new LngLatAlt(c.x,c.y));
                 Polygon tempGeoObject = new Polygon();
-                tempGeoObject.setExteriorRing(points);
-                geoObjectMultiPolygon.add(tempGeoObject);
+                if(i==0)
+                    tempGeoObject.setExteriorRing(points);
+                else
+                    tempGeoObject.addInteriorRing(points);
+                provincia.setGeometry(tempGeoObject);
+               // geoObjectMultiPolygon.add(tempGeoObject);
 
             }
             provincia.setGeometry(geoObjectMultiPolygon);
