@@ -80,8 +80,9 @@ public class MapRenderController
             Feature f = new Feature();
             f.setProperty("info",map);
             Polygon pol = getgeomfield(p.getGeom());
-            pol.
+            f.setGeometry(pol);
             geojson.add(f);
+
 
 
 
@@ -98,10 +99,10 @@ public class MapRenderController
         ArrayList<LngLatAlt> coordinates = new ArrayList<>();
         Coordinate start = g.getCoordinates()[0];
         Coordinate finish = g.getCoordinates()[g.getCoordinates().length-1];
-        if(!start.equals(finish)) return p;
+       // if(!start.equals(finish)) return p;
         for(Coordinate c : g.getCoordinates())
         {
-            coordinates.add(new LngLatAlt(c.x,c.y,c.z));
+            coordinates.add(new LngLatAlt(c.x,c.y));
         }
         p.setExteriorRing(coordinates);
         return p;
