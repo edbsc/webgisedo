@@ -3,8 +3,10 @@ import com.edoardo.webgis.webgisedo.entity.ProvinceEntity;
 import com.edoardo.webgis.webgisedo.repo.ProviceRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
-import org.geojson.FeatureCollection;
+import org.geojson.*;
+import org.geojson.Polygon;
 import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -66,41 +68,44 @@ public class MapRenderController
 //        return json;
 //
 //    }
-    public @ResponseBody  ArrayList<HashMap<String,String>> getAllprov() {
+    public @ResponseBody  FeatureCollection getAllprov() {
         List<ProvinceEntity> prov = proviceRepo.findAll();
-        GeometryFactory ringmaker = new GeometryFactory();
-        ArrayList<Polygon> confini = new ArrayList<>();
-        FeatureCollection featureCollection = new FeatureCollection();
-
+        FeatureCollection geojson = new FeatureCollection();
+        HashMap<String,String> map =new HashMap<>();
         for(ProvinceEntity p : prov.subList(0,prov.size()))
         {
-            HashMap<String,String> map = new HashMap<>();
             map.put("ID",""+p.getGid());
-            map.put("Codice",p.getSigla());
-            map.put("Nome",p.getDen_prov());
-            Geometry geom = p.getGeom().getGeometryN(0);
-            if(geom.isSimple())
-            {
-                map.put("type","FeatureCollection");
-                Coordinate start = geom.getCoordinates()[0];
-                Coordinate finish = geom.getCoordinates()[geom.getCoordinates().length-1];
-                if(start.equals(finish))
-                {
-                    confini.add(ringmaker.createPolygon(geom.getCoordinates()));
+            map.put("sigla",p.getSigla());
+            map.put("nome",p.getDen_prov());
+            Feature f = new Feature();
+            f.setProperty("info",map);
+            Polygon pol = getgeomfield(p.getGeom());
+            pol.
+            geojson.add(f);
 
 
-                }
-            }
-            json.add(map);
+
+
+
+
         }
-
-        return json;
+        return geojson;
 
     }
-    public String feature_maker(Polygon geom)
+    public Polygon getgeomfield(Geometry g)
     {
-        String formatted = "";
-        return formatted;
+        Polygon p = new Polygon();
+        ArrayList<LngLatAlt> coordinates = new ArrayList<>();
+        Coordinate start = g.getCoordinates()[0];
+        Coordinate finish = g.getCoordinates()[g.getCoordinates().length-1];
+        if(!start.equals(finish)) return p;
+        for(Coordinate c : g.getCoordinates())
+        {
+            coordinates.add(new LngLatAlt(c.x,c.y,c.z));
+        }
+        p.setExteriorRing(coordinates);
+        return p;
     }
+
 
 }
