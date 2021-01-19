@@ -71,15 +71,17 @@ public class MapRenderController
     public @ResponseBody  FeatureCollection getAllprov() {
         List<ProvinceEntity> prov = proviceRepo.findAll();
         FeatureCollection geojson = new FeatureCollection();
-        HashMap<String,String> map =new HashMap<>();
+
+
         for(ProvinceEntity p : prov.subList(0,prov.size()))
         {
+            HashMap<String,String> map =new HashMap<>();
             map.put("ID",""+p.getGid());
             map.put("sigla",p.getSigla());
             map.put("nome",p.getDen_prov());
             Feature f = new Feature();
             f.setProperty("info",map);
-            Polygon pol = getgeomfield(p.getGeom());
+            Polygon pol = getGeomValueforJSon(p.getGeom(),p.getDen_prov());
             f.setGeometry(pol);
             geojson.add(f);
 
@@ -93,13 +95,29 @@ public class MapRenderController
         return geojson;
 
     }
-    public Polygon getgeomfield(Geometry g)
+    public Polygon getGeomValueforJSon(Geometry g, String nome_prov)
     {
         Polygon p = new Polygon();
         ArrayList<LngLatAlt> coordinates = new ArrayList<>();
         Coordinate start = g.getCoordinates()[0];
         Coordinate finish = g.getCoordinates()[g.getCoordinates().length-1];
-       // if(!start.equals(finish)) return p;
+        if(!start.equals(finish))
+        {
+            System.out.println("prov : " + nome_prov + " start :" + start.x + " "+start.y+ " finish :" + finish.x + " "+finish.y);
+            Coordinate[] corr_coord = new Coordinate[g.getCoordinates().length+1];
+            for(int i=0; i< g.getCoordinates().length ;i++)
+            {
+                corr_coord[i]=g.getCoordinates()[i];
+            }
+            corr_coord[corr_coord.length-1] = g.getCoordinates()[0];
+            GeometryFactory geomcorrf = new GeometryFactory();
+            org.locationtech.jts.geom.Polygon pcorr = geomcorrf.createPolygon(corr_coord);
+            g=pcorr;
+
+
+
+
+        }
         for(Coordinate c : g.getCoordinates())
         {
             coordinates.add(new LngLatAlt(c.x,c.y));
