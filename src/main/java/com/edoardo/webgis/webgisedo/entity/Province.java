@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name ="province")
-public class ProvinceEntity {
+public class Province {
 
     @Id
     @Column(name = "gid")
