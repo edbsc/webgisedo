@@ -5,6 +5,8 @@ import com.edoardo.webgis.webgisedo.entity.Province;
 import com.edoardo.webgis.webgisedo.repo.ProviceRepo;
 import org.geojson.*;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,19 +27,28 @@ public class GeoJsonFactoryService
         {
             Feature provincia = new Feature();
             provincia.setProperty("info",createInfo(p));
-            Polygon confini = new Polygon();
-            org.locationtech.jts.geom.Geometry provinciaGeom = p.getGeom();
-            List<LngLatAlt> points = new ArrayList<>();
-            log.info(String.valueOf(provinciaGeom.getNumGeometries()));
-//            if(provinciaGeom.getNumGeometries()>1)
-//                for(Coordinate c : provinciaGeom.getGeometryN(1).getCoordinates())
-//                    points.add(new LngLatAlt(c.x,c.y));
-//            else
-                for(Coordinate c : provinciaGeom.getGeometryN(0).getCoordinates())
+            Geometry provinciaGeom = p.getGeom();
+            MultiPolygon provinciaPol = (MultiPolygon)provinciaGeom;
+            org.geojson.MultiPolygon geoObjectMultiPolygon = new org.geojson.MultiPolygon();
+            for(int i=0; i<provinciaPol.getNumGeometries();i++)
+            {
+                List<LngLatAlt> points = new ArrayList<>();
+                for(Coordinate c : provinciaPol.getGeometryN(i).getCoordinates())
                     points.add(new LngLatAlt(c.x,c.y));
+                Polygon tempGeoObject = new Polygon();
+                tempGeoObject.setExteriorRing(points);
+                geoObjectMultiPolygon.add(tempGeoObject);
 
-            confini.setExteriorRing(points);
-            provincia.setGeometry(confini);
+            }
+            provincia.setGeometry(geoObjectMultiPolygon);
+
+
+//
+
+
+
+
+
             geoJson.add(provincia);
 
         }
