@@ -6,7 +6,6 @@ import com.edoardo.webgis.webgisedo.repo.ProviceRepo;
 import org.geojson.*;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.MultiPolygon;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,12 +27,13 @@ public class GeoJsonFactoryService
             Feature provincia = new Feature();
             provincia.setProperty("info",createInfo(p));
             Geometry provinciaGeom = p.getGeom();
-            MultiPolygon provinciaPol = (MultiPolygon)provinciaGeom;
+            org.locationtech.jts.geom.Polygon provinciaPol = (org.locationtech.jts.geom.Polygon) provinciaGeom.getGeometryN(0);
             org.geojson.MultiPolygon geoObjectMultiPolygon = new org.geojson.MultiPolygon();
             for(int i=0; i<provinciaPol.getNumGeometries();i++)
             {
                 List<LngLatAlt> points = new ArrayList<>();
-                for(Coordinate c : provinciaPol.getGeometryN(i).getCoordinates())
+                org.locationtech.jts.geom.LineString exteriorRing = provinciaPol.getExteriorRing();
+                for(Coordinate c : exteriorRing.getCoordinates())
                     points.add(new LngLatAlt(c.x,c.y));
                 Polygon tempGeoObject = new Polygon();
                 tempGeoObject.setExteriorRing(points);

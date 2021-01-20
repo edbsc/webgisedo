@@ -19,6 +19,8 @@ public class MapRenderController
     private final static Logger log = Logger.getLogger(MapRenderController.class.getName());
     @Autowired
     ProviceRepo proviceRepo;
+    @Autowired
+    GeoJsonFactoryService geoJsonFactory;
     @GetMapping(value = {"/main","/"})
     public String maprender(@RequestParam(name="name", required=false, defaultValue="prova") String name, Model model)
     {
@@ -28,7 +30,7 @@ public class MapRenderController
     @GetMapping(value = "/getprov",produces="application/json")
     public @ResponseBody  FeatureCollection getAllprov() {
 
-        GeoJsonFactoryService geoJsonFactory = new GeoJsonFactoryService();
+        geoJsonFactory = new GeoJsonFactoryService();
         return geoJsonFactory.makeGeoJson(proviceRepo.findAll());
 
 
